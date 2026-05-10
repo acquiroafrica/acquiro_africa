@@ -64,7 +64,11 @@ export default function UserProfilesClient({ users }: Props) {
       })
       const json = await res.json()
       if (res.ok) {
-        setDeletedIds(prev => new Set([...prev, userId]))
+        setDeletedIds(prev => {
+          const next = new Set(prev)
+          next.add(userId)
+          return next
+        })
       } else {
         alert(`Failed to delete user: ${json.error}`)
       }
