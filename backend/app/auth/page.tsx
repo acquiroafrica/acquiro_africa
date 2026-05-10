@@ -5,7 +5,9 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { Role } from '@/types'
 
-export default function AuthPage() {
+import { Suspense } from 'react'
+
+function AuthForm() {
   const router = useRouter()
   const params = useSearchParams()
   const supabase = createClient()
@@ -33,7 +35,6 @@ export default function AuthPage() {
     setSuccess('')
 
     if (tab === 'signup') {
-      // Use server-side route with service role to bypass RLS and auto-confirm email
       const res = await fetch('/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -55,17 +56,12 @@ export default function AuthPage() {
         return
       }
 
-      if (json.warning) {
-        console.warn('Registration warning:', json.warning)
-      }
-
       setSuccess('Account created! You can now log in.')
       setTab('login')
     } else {
       const { error: loginError } = await supabase.auth.signInWithPassword({ email, password })
       if (loginError) { setError(loginError.message); setLoading(false); return }
 
-      // Fetch the logged-in user and their role row
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         const { data: roleRow } = await supabase
@@ -74,7 +70,6 @@ export default function AuthPage() {
           .eq('user_id', user.id)
           .maybeSingle()
 
-        // If no role row exists (user was created before the fix), auto-repair it
         if (!roleRow) {
           await fetch('/api/repair-profile', {
             method: 'POST',
@@ -83,7 +78,6 @@ export default function AuthPage() {
           })
         }
 
-        // Redirect based on role
         const role = roleRow?.role ?? 'buyer'
         if (role === 'admin') {
           router.push('/admin')
@@ -97,7 +91,6 @@ export default function AuthPage() {
     }
     setLoading(false)
   }
-
 
   return (
     <div className="auth-wrap">
@@ -206,5 +199,19 @@ export default function AuthPage() {
         </p>
       </div>
     </div>
+  )
+}
+
+export default function AuthPage() {
+  return (
+    <Suspense fallback={
+      <div className="auth-wrap">
+        <div className="auth-card" style={{ textAlign: 'center', padding: '40px' }}>
+          <p>Loading auth...</p>
+        </div>
+      </div>
+    }>
+      <AuthForm />
+    </Suspense>
   )
 }
