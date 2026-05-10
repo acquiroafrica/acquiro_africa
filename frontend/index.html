@@ -16,7 +16,8 @@
   </head>
   <body>
     <div id="app"></div>
-    <script>
+    <script type="module">
+      const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://acquiro-africa.vercel.app";
       const images={
         hero:"https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=1200&q=80",
         seller:"https://images.unsplash.com/photo-1556745757-8d76bdb6984b?auto=format&fit=crop&w=900&q=80",
@@ -33,7 +34,11 @@
       const directory=[["Food & Hospitality Business","Food & Hospitality","Lagos","₦20M-₦50M","Verified"],["Healthcare Business","Healthcare","Abuja","₦10M-₦20M","Verified"],["Cold Chain Operator","Agribusiness","Rivers","₦5M-₦10M","In review"],["Packaging Plant","Manufacturing","Ogun","₦20M-₦50M","Verified"],["Training Institute","Education","Lagos","₦5M-₦10M","Verified"]];
       const app=document.getElementById("app");
       const state={modal:null,submitted:null};
-      const open=(modal)=>{state.modal=modal;state.submitted=null;render()};
+      const open=(modal)=>{
+        if(modal==='buyer'){window.location.href=`${BACKEND_URL}/auth?role=buyer`}
+        else if(modal==='seller'){window.location.href=`${BACKEND_URL}/auth?role=seller`}
+        else{state.modal=modal;state.submitted=null;render()}
+      };
       const close=()=>{state.modal=null;state.submitted=null;render()};
       const submit=(event)=>{event.preventDefault();state.submitted="Thank you. Your request has been received. Our team will review it and follow up if there is a fit.";render()};
       function dealCard(l){return `<article class="deal"><div class="deal-img"><img src="${l.img}" alt="${l.sector} business"></div><div class="deal-body"><div class="deal-top"><span class="tag">${l.sector}</span><span class="verified">Reviewed</span></div><h3>${l.sector} Business</h3><p>${l.lga}, ${l.state} · ${l.deal}</p><div class="metrics"><div><b>${l.mrr}</b><span>Revenue</span></div><div><b>${l.years}</b><span>Operating</span></div><div><b>${l.staff}</b><span>Staff</span></div></div><p>${l.desc}</p><div class="chips">${l.tags.map(t=>`<span>${t}</span>`).join("")}</div><div style="display:flex;align-items:center;justify-content:space-between;gap:12px"><strong>${l.price}</strong><button class="btn ghost" data-modal="buyer">Request access</button></div></div></article>`}

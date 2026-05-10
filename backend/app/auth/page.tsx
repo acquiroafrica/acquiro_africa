@@ -195,7 +195,7 @@ function AuthForm() {
         </form>
 
         <p style={{ fontSize: 13, color: 'var(--muted)', textAlign: 'center', marginTop: 20 }}>
-          <a href="/" style={{ color: 'var(--teal)' }}>← Back to home</a>
+          <a href={process.env.NEXT_PUBLIC_FRONTEND_URL || "/"} style={{ color: 'var(--teal)' }}>← Back to home</a>
         </p>
       </div>
     </div>
